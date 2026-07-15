@@ -1,0 +1,757 @@
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Latest Prayer Schedule</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&amp;family=Roboto:ital,wght@0,100..900;1,100..900&amp;display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      height: 100%;
+      /* width: 515px;
+      height: 600px; */
+    }
+
+    /* Font Family */
+    .roboto-condensed-font {
+      font-family: "Roboto Condensed", sans-serif;
+      font-optical-sizing: auto;
+      font-weight: 100 900;
+      font-style: normal;
+    }
+
+    body {
+      font-family: "Roboto", sans-serif;
+      color: #fff;
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      /* Changed from fixed 515px to 100% to fill iframe */
+      height: 100%;
+      /* Ensure body takes full height */
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      /* Latest Change */
+      background-color: transparent;
+      border-radius: 1rem;
+
+    }
+
+    .schedule-card {
+      --times-panel-width: 225px;
+      --time-column-width: 104px;
+      --times-gap: 8px;
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      border-radius: 1rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      /* border: 1px solid rgba(255, 255, 255, 0.08); */
+
+      /* Ensure background properties are set here as defaults */
+      background-size: cover !important;
+      background-position: center center !important;
+      background-repeat: no-repeat !important;
+    }
+
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 4px;
+      align-self: stretch;
+      margin-bottom: 10px;
+    }
+
+    .content-wrapper {
+      flex: 1;
+      overflow-y: auto;
+      scrollbar-gutter: stable both-edges;
+      min-height: 0;
+      padding-bottom: 8px;
+    }
+
+    /* Custom scrollbar styling */
+    .content-wrapper::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .content-wrapper::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+    }
+
+    .content-wrapper::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 3px;
+    }
+
+    .content-wrapper::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.5);
+    }
+
+    .header h2 {
+      margin: 16px 2px 0px;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-align: center;
+      font-style: normal;
+      line-height: 130%;
+    }
+
+    .header p {
+      margin: 4px 0 0;
+      opacity: 0.8;
+      color: white;
+      text-align: center;
+      font-size: 14px;
+      font-style: normal;
+      font-weight: 500;
+      line-height: 150%;
+    }
+
+    .row {
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background-color: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(4px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 8px 6px 12px;
+      margin: 6px 12px;
+      min-height: 57px;
+    }
+
+    .row:last-of-type {
+      border-bottom: none;
+    }
+
+    .left {
+      text-align: left;
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    .left h3 {
+      margin: 0;
+      /* font-size: 20px; */
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      line-height: 143%;
+      white-space: nowrap;
+      line-height: 1.2;
+      color: #FFF;
+      font-style: normal;
+      text-transform: capitalize;
+    }
+
+    .left p {
+      color: rgba(243, 244, 246, 0.50);
+      font-size: 12px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 120%;
+    }
+
+    .divider {
+      width: 1px;
+      height: 42px;
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .offset-column-container {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 3px;
+    }
+
+    .right {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-end;
+      flex: 0 0 auto;
+      width: var(--times-panel-width);
+      gap: var(--times-gap);
+    }
+
+    .adhan-column,
+    .iqamah-column,
+    .khutbah-column {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      min-width: 0;
+      width: var(--time-column-width);
+    }
+
+    .time-column {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      text-align: left;
+    }
+
+    .time-value {
+      color: #FFF;
+      font-size: 28px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 75%;
+      /* letter-spacing: 0.2px; */
+      /* margin-bottom: 6px; */
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .time-value .ampm {
+      color: rgba(255, 255, 255, 0.50);
+      text-align: center;
+      font-size: 0.75rem;
+      font-weight: 400 !important;
+      font-style: normal;
+      line-height: 87%;
+      display: inline-block;
+      writing-mode: vertical-rl;
+      text-orientation: upright;
+      opacity: 0.95;
+      /* line-height: 1; */
+      transform: none;
+      margin: 0px 4px 0 0;
+      white-space: nowrap;
+    }
+
+    .time-label {
+      color: #F3F4F6;
+      font-size: 0.75rem;
+      font-style: normal;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      line-height: 100%;
+    }
+
+    .offset-time-label {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 2px;
+    }
+
+    .offset-column {
+      display: inline-flex;
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    .offset-value {
+      font-size: 28px;
+      letter-spacing: 0.2px;
+      line-height: 1;
+      /* margin-bottom: 6px; */
+      display: inline-flex;
+      align-items: flex-start;
+      color: white;
+      font-weight: 400;
+      line-height: 100%;
+    }
+
+    .offset-time-value {
+      display: flex;
+      flex-direction: row;
+      justify-content: end;
+    }
+
+    .offset-unit {
+      color: rgba(255, 255, 255, 0.50);
+      display: block;
+      font-size: 0.75rem;
+      opacity: 0.95;
+      line-height: 1;
+      white-space: nowrap;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 400 !important;
+      line-height: 87%;
+    }
+
+    .offset-text {
+      display: block;
+      color: #F3F4F6;
+      font-size: 12px;
+      font-weight: 400;
+      text-align: left;
+      line-height: 87%;
+      text-transform: capitalize;
+    }
+
+    .right [data-column-type] .time-value,
+    .right [data-column-type] .offset-value {
+      font-weight: 400 !important;
+    }
+
+    .right [data-column-emphasis="secondary"] .time-value,
+    .right [data-column-emphasis="secondary"] .offset-value {
+      font-weight: 700 !important;
+    }
+
+    .footer {
+      padding: 8px 32px 12px 32px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .footer a {
+      text-decoration: none;
+    }
+
+    .footer p {
+      margin: 0 8px 0 0;
+      color: rgba(243, 244, 246, 0.50);
+      text-align: center;
+      font-size: 12px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 150%;
+    }
+
+    .footer div {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .footer img {
+      width: 64.75px;
+      height: 14px;
+      opacity: 0.9;
+    }
+
+    .no-salah-message {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      color: white;
+      text-align: center;
+      font-size: 14px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: 150%;
+    }
+
+    @media (max-width: 768px) {
+      .schedule-card {
+        --times-panel-width: 210px;
+        --time-column-width: 97px;
+      }
+
+      .header {
+        margin-bottom: 8px;
+        padding: 0 10px;
+      }
+
+      .header h2 {
+        margin: 16px 0 0;
+        font-size: 22px;
+      }
+
+      .header p {
+        font-size: 13px;
+      }
+
+      .row {
+        margin: 6px 10px;
+        padding: 6px 10px;
+      }
+
+      .left h3 {
+        font-size: 1.125rem;
+        white-space: normal;
+      }
+
+      .time-value,
+      .offset-value {
+        font-size: 26px;
+      }
+
+      .footer {
+        padding: 8px 10px 12px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .schedule-card {
+        --times-panel-width: 186px;
+        --time-column-width: 86px;
+        --times-gap: 6px;
+      }
+
+      .header {
+        padding: 0 8px;
+      }
+
+      .header h2 {
+        font-size: 20px;
+      }
+
+      .header p {
+        font-size: 12px;
+      }
+
+      .row {
+        margin: 5px 8px;
+        padding: 6px 8px;
+      }
+
+      .left h3 {
+        font-size: 1rem;
+      }
+
+      .left p,
+      .time-label,
+      .offset-unit,
+      .offset-text,
+      .footer p {
+        font-size: 11px;
+      }
+
+      .time-value,
+      .offset-value {
+        font-size: 23px;
+      }
+
+      .time-value .ampm {
+        font-size: 11px;
+      }
+
+      .divider {
+        height: 36px;
+      }
+
+      .footer {
+        padding: 8px 8px 12px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .schedule-card {
+        --times-panel-width: 174px;
+        --time-column-width: 81px;
+        --times-gap: 5px;
+      }
+
+      .content-wrapper {
+        padding-bottom: 6px;
+      }
+
+      .header {
+        padding: 0 6px;
+      }
+
+      .header h2 {
+        font-size: 18px;
+      }
+
+      .header p {
+        font-size: 11px;
+      }
+
+      .row {
+        margin: 4px 6px;
+        padding: 6px;
+      }
+
+      .left h3 {
+        font-size: 0.95rem;
+      }
+
+      .time-value,
+      .offset-value {
+        font-size: 21px;
+      }
+
+      .time-label,
+      .offset-unit,
+      .offset-text,
+      .footer p {
+        font-size: 10px;
+      }
+
+      .time-value .ampm {
+        font-size: 10px;
+      }
+
+      .footer {
+        padding: 8px 6px 12px;
+      }
+
+      .footer img {
+        width: 60px;
+        height: auto;
+      }
+    }
+  </style>
+</head>
+
+<body>
+<div class="schedule-card" data-adhan-enabled="true" data-iqamah-enabled="true" style=" position: relative; overflow: hidden;">
+    
+    <img src="photo.jpg"
+         style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1;" 
+         alt="" />
+
+    <div class="schedule-content" style="position: relative; z-index: 1;">
+        </div>
+    <div class="header">
+      <h2>Darul Jannah Masjid Salah Table</h2>
+      <p>Mon, Jul 13, 2026 | 28 Muḥarram, 1448</p>
+    </div>
+  
+    <div class="content-wrapper">
+      <div class="row" data-prayer="Fajr" data-sorted-list="Adhan,Iqamah" data-display-offset-calculated-time="false" data-at-waqt="false" data-waqt-time="4:33 AM" data-calculated-waqt-time="4:33 AM" data-actual-waqt-time="" data-prayer-time="" data-at-waqt-time="" data-adhan-time="5:59 AM" data-iqamah-time="6:20 AM" data-khutbah-time="1:54 PM" data-adhan-fixed-time="" data-iqamah-fixed-time="" data-khutbah-fixed-time="13:54" data-adhan-settings="fixed" data-iqamah-settings="fixed" data-khutbah-settings="fixed" data-adhan-offset="" data-adhan-offset-text="" data-iqamah-offset="" data-iqamah-offset-text="" data-khutbah-offset="" data-khutbah-offset-text="atwaqt">
+        <div class="left">
+          <h3>Fajr</h3>
+          
+        </div>
+        <div class="right roboto-condensed-font">
+          <div class="adhan-column" data-column-type="adhan" data-column-emphasis="primary">
+            <div class="time-column">
+              <div style="font-weight: 400;" class="time-value" data-time="5:59 AM" data-time-setting="fixed" data-at-waqt="false" data-waqt-time="4:33 AM">05:59<span class="ampm">AM</span></div>
+              <div class="time-label">Adhan</div>
+            </div>
+          </div>
+          <div class="divider"></div><div class="iqamah-column" data-column-type="iqamah" data-column-emphasis="secondary">
+            <div class="time-column">
+              <div style="font-weight: 700;" class="time-value" data-time="6:20 AM" data-time-setting="fixed" data-at-waqt="false" data-waqt-time="4:33 AM">06:20<span class="ampm">AM</span></div>
+              <div class="time-label">Iqamah</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row" data-prayer="Zuhr" data-sorted-list="Adhan,Iqamah" data-display-offset-calculated-time="false" data-at-waqt="false" data-waqt-time="1:44 PM" data-calculated-waqt-time="1:44 PM" data-actual-waqt-time="" data-prayer-time="" data-at-waqt-time="" data-adhan-time="1:06 PM" data-iqamah-time="1:30 PM" data-khutbah-time="1:55 PM" data-adhan-fixed-time="" data-iqamah-fixed-time="" data-khutbah-fixed-time="13:55" data-adhan-settings="fixed" data-iqamah-settings="fixed" data-khutbah-settings="fixed" data-adhan-offset="" data-adhan-offset-text="" data-iqamah-offset="" data-iqamah-offset-text="" data-khutbah-offset="" data-khutbah-offset-text="atwaqt">
+        <div class="left">
+          <h3>Zuhr</h3>
+          
+        </div>
+        <div class="right roboto-condensed-font">
+          <div class="adhan-column" data-column-type="adhan" data-column-emphasis="primary">
+            <div class="time-column">
+              <div style="font-weight: 400;" class="time-value" data-time="1:06 PM" data-time-setting="fixed" data-at-waqt="false" data-waqt-time="1:44 PM">01:06<span class="ampm">PM</span></div>
+              <div class="time-label">Adhan</div>
+            </div>
+          </div>
+          <div class="divider"></div><div class="iqamah-column" data-column-type="iqamah" data-column-emphasis="secondary">
+            <div class="time-column">
+              <div style="font-weight: 700;" class="time-value" data-time="1:30 PM" data-time-setting="fixed" data-at-waqt="false" data-waqt-time="1:44 PM">01:30<span class="ampm">PM</span></div>
+              <div class="time-label">Iqamah</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row" data-prayer="Asr" data-sorted-list="Adhan,Iqamah" data-display-offset-calculated-time="false" data-at-waqt="false" data-waqt-time="6:56 PM" data-calculated-waqt-time="6:56 PM" data-actual-waqt-time="" data-prayer-time="" data-at-waqt-time="" data-adhan-time="4:25 PM" data-iqamah-time="5:00 PM" data-khutbah-time="1:57 PM" data-adhan-fixed-time="" data-iqamah-fixed-time="" data-khutbah-fixed-time="13:57" data-adhan-settings="fixed" data-iqamah-settings="fixed" data-khutbah-settings="fixed" data-adhan-offset="" data-adhan-offset-text="" data-iqamah-offset="" data-iqamah-offset-text="" data-khutbah-offset="" data-khutbah-offset-text="atwaqt">
+        <div class="left">
+          <h3>Asr</h3>
+          
+        </div>
+        <div class="right roboto-condensed-font">
+          <div class="adhan-column" data-column-type="adhan" data-column-emphasis="primary">
+            <div class="time-column">
+              <div style="font-weight: 400;" class="time-value" data-time="4:25 PM" data-time-setting="fixed" data-at-waqt="false" data-waqt-time="6:56 PM">04:25<span class="ampm">PM</span></div>
+              <div class="time-label">Adhan</div>
+            </div>
+          </div>
+          <div class="divider"></div><div class="iqamah-column" data-column-type="iqamah" data-column-emphasis="secondary">
+            <div class="time-column">
+              <div style="font-weight: 700;" class="time-value" data-time="5:00 PM" data-time-setting="fixed" data-at-waqt="false" data-waqt-time="6:56 PM">05:00<span class="ampm">PM</span></div>
+              <div class="time-label">Iqamah</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row" data-prayer="Maghrb" data-sorted-list="Adhan,Iqamah" data-display-offset-calculated-time="false" data-at-waqt="false" data-waqt-time="9:12 PM" data-calculated-waqt-time="9:12 PM" data-actual-waqt-time="" data-prayer-time="" data-at-waqt-time="" data-adhan-time="6:59 PM" data-iqamah-time="7:06 PM" data-khutbah-time="2:05 PM" data-adhan-fixed-time="" data-iqamah-fixed-time="" data-khutbah-fixed-time="14:05" data-adhan-settings="fixed" data-iqamah-settings="fixed" data-khutbah-settings="fixed" data-adhan-offset="" data-adhan-offset-text="" data-iqamah-offset="" data-iqamah-offset-text="" data-khutbah-offset="" data-khutbah-offset-text="atwaqt">
+        <div class="left">
+          <h3>Maghrb</h3>
+          
+        </div>
+        <div class="right roboto-condensed-font">
+          <div class="adhan-column" data-column-type="adhan" data-column-emphasis="primary">
+            <div class="time-column">
+              <div style="font-weight: 400;" class="time-value" data-time="6:59 PM" data-time-setting="fixed" data-at-waqt="false" data-waqt-time="9:12 PM">06:59<span class="ampm">PM</span></div>
+              <div class="time-label">Adhan</div>
+            </div>
+          </div>
+          <div class="divider"></div><div class="iqamah-column" data-column-type="iqamah" data-column-emphasis="secondary">
+            <div class="time-column">
+              <div style="font-weight: 700;" class="time-value" data-time="7:06 PM" data-time-setting="fixed" data-at-waqt="false" data-waqt-time="9:12 PM">07:06<span class="ampm">PM</span></div>
+              <div class="time-label">Iqamah</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row" data-prayer="Isha" data-sorted-list="Adhan,Iqamah" data-display-offset-calculated-time="false" data-at-waqt="false" data-waqt-time="10:52 PM" data-calculated-waqt-time="10:52 PM" data-actual-waqt-time="" data-prayer-time="" data-at-waqt-time="" data-adhan-time="8:14 PM" data-iqamah-time="8:45 PM" data-khutbah-time="2:09 PM" data-adhan-fixed-time="" data-iqamah-fixed-time="" data-khutbah-fixed-time="14:09" data-adhan-settings="fixed" data-iqamah-settings="fixed" data-khutbah-settings="fixed" data-adhan-offset="" data-adhan-offset-text="" data-iqamah-offset="" data-iqamah-offset-text="" data-khutbah-offset="" data-khutbah-offset-text="atwaqt">
+        <div class="left">
+          <h3>Isha</h3>
+          
+        </div>
+        <div class="right roboto-condensed-font">
+          <div class="adhan-column" data-column-type="adhan" data-column-emphasis="primary">
+            <div class="time-column">
+              <div style="font-weight: 400;" class="time-value" data-time="8:14 PM" data-time-setting="fixed" data-at-waqt="false" data-waqt-time="10:52 PM">08:14<span class="ampm">PM</span></div>
+              <div class="time-label">Adhan</div>
+            </div>
+          </div>
+          <div class="divider"></div><div class="iqamah-column" data-column-type="iqamah" data-column-emphasis="secondary">
+            <div class="time-column">
+              <div style="font-weight: 700;" class="time-value" data-time="8:45 PM" data-time-setting="fixed" data-at-waqt="false" data-waqt-time="10:52 PM">08:45<span class="ampm">PM</span></div>
+              <div class="time-label">Iqamah</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row" data-prayer="Jummah" data-sorted-list="Iqamah" data-display-offset-calculated-time="false" data-at-waqt="true" data-waqt-time="1:44 PM" data-calculated-waqt-time="1:44 PM" data-actual-waqt-time="" data-prayer-time="" data-at-waqt-time="" data-adhan-time="1:44 PM" data-iqamah-time="13:15" data-khutbah-time="14:10" data-adhan-fixed-time="" data-iqamah-fixed-time="" data-khutbah-fixed-time="14:10" data-adhan-settings="atwaqt" data-iqamah-settings="fixed" data-khutbah-settings="fixed" data-adhan-offset="" data-adhan-offset-text="" data-iqamah-offset="" data-iqamah-offset-text="" data-khutbah-offset="" data-khutbah-offset-text="atwaqt">
+        <div class="left">
+          <h3>Jummah</h3>
+          
+        </div>
+        <div class="right roboto-condensed-font">
+          <div class="iqamah-column" data-column-type="iqamah" data-column-emphasis="secondary">
+            <div class="time-column">
+              <div style="font-weight: 700;" class="time-value" data-time="13:15" data-time-setting="fixed" data-at-waqt="true" data-waqt-time="1:44 PM">01:15<span class="ampm">PM</span></div>
+              <div class="time-label">Iqamah</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>Powered by</p>
+      <a href="https://myababil.com/?utm_source=web&amp;utm_medium=web-masjid&amp;utm_campaign=salah-embed" target="_blank" rel="noopener noreferrer">
+        <div>
+          <img src="https://web-assets.myababil.com/website/ababil.svg" alt="Ababil Logo">
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <script>
+(function(){function to12Hour(timeStr){if(!timeStr)return timeStr;var s=String(timeStr).trim();if(/[ap]\.?m\.?/i.test(s)){var normalized=s.replace(/\./g,'').toUpperCase();var m=normalized.match(/^(\d{1,2}):(\d{2})(?::\d{2})?\s*([AP]M)$/i);if(m){var hh=String(m[1]).padStart(2,'0');return hh+':'+m[2]+' '+m[3]}
+return normalized}
+var m=s.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);if(!m)return s;var hh=parseInt(m[1],10);var mm=m[2];var ampm=hh>=12?'PM':'AM';var hh12=hh%12||12;var hh12Padded=String(hh12).padStart(2,'0');return hh12Padded+':'+mm+' '+ampm}
+function formatTimes(){var timeElements=document.querySelectorAll('.time-value[data-time]');if(timeElements.length===0){setTimeout(formatTimes,50);return}
+timeElements.forEach(function(el){try{var raw=el.getAttribute('data-time');var formatted=to12Hour(raw);if(!formatted)return;var m=formatted.match(/^(.*?)(?:\s([AP]M))$/i);if(m){var timePart=m[1];var suffix=m[2].toUpperCase();el.innerHTML=timePart+'<span class="ampm">'+suffix+'</span>'}else{el.textContent=formatted}}catch(e){}})}
+function formatOffsetTexts(){function normalizeOffsetText(text){var normalized=String(text||'').trim();if(!normalized)return normalized;normalized=normalized.replace(/[_-]+/g,' ');normalized=normalized.replace(/([a-z])([A-Z])/g,'$1 $2');normalized=normalized.replace(/\bafter\s*adhan\b/gi,'After Adhan');normalized=normalized.replace(/\bbefore\s*adhan\b/gi,'Before Adhan');normalized=normalized.replace(/\bafter\s*waqt\b/gi,'After Waqt');normalized=normalized.replace(/\bbefore\s*waqt\b/gi,'Before Waqt');return normalized.replace(/\s+/g,' ').trim()}
+var offsetElements=document.querySelectorAll('.offset-time-label[data-offset-text]');if(offsetElements.length===0){setTimeout(formatOffsetTexts,50);return}
+offsetElements.forEach(function(el){try{var text=el.getAttribute('data-offset-text');if(!text)return;var normalizedText=normalizeOffsetText(text);var parts=normalizedText.split(/\s*MIN\s*/i);var relationText=parts.length>=2?parts[1].trim():normalizedText;if(relationText){el.innerHTML='<span class="offset-unit">MIN</span><span class="offset-text">'+relationText+'</span>'}else{el.innerHTML='<span class="offset-unit">MIN</span>'}}catch(e){}});var offsetValues=document.querySelectorAll('.offset-value');offsetValues.forEach(function(el){try{var value=el.textContent.trim();var num=parseInt(value,10);if(!isNaN(num)&&num>=0&&num<=9){el.textContent='0'+num}}catch(e){}})}
+function isTruthyFlag(value){return/^(true|1|yes)$/i.test(String(value||'').trim())}
+function parseTimeToMinutes(timeStr){if(!timeStr)return null;var s=String(timeStr).trim().replace(/\./g,'').toUpperCase();if(!s||s==='OFFSET')return null;var m12=s.match(/^(\d{1,2}):(\d{2})(?::\d{2})?\s*([AP]M)$/);if(m12){var hours12=parseInt(m12[1],10);var minutes12=parseInt(m12[2],10);if(hours12<1||hours12>12||minutes12>59)return null;if(m12[3]==='PM'&&hours12!==12){hours12+=12}else if(m12[3]==='AM'&&hours12===12){hours12=0}
+return(hours12*60)+minutes12}
+var m24=s.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);if(m24){var hours24=parseInt(m24[1],10);var minutes24=parseInt(m24[2],10);if(hours24>23||minutes24>59)return null;return(hours24*60)+minutes24}
+return null}
+function addMinutesToTime(baseTime,offsetMinutes){var baseMinutes=parseTimeToMinutes(baseTime);var offset=parseInt(offsetMinutes,10);if(baseMinutes===null||isNaN(offset))return'';var totalMinutes=(baseMinutes+offset)%(24*60);if(totalMinutes<0)totalMinutes+=24*60;var hours=Math.floor(totalMinutes/60);var minutes=totalMinutes%60;return String(hours).padStart(2,'0')+':'+String(minutes).padStart(2,'0')}
+function renderTimeValue(el,timeStr){var formatted=to12Hour(timeStr);if(!formatted)return;var m=formatted.match(/^(.*?)(?:\s([AP]M))$/i);if(m){el.innerHTML=m[1]+'<span class="ampm">'+m[2].toUpperCase()+'</span>'}else{el.textContent=formatted}
+el.setAttribute('data-time',timeStr)}
+function isAtWaqtMarker(value){return/^(at\s*waqt|at[_-]?waqt|atwaqt)$/i.test(String(value||'').trim())}
+var inferredWaqtTimesByGroup={};function getFirstTimeValue(values){for(var i=0;i<values.length;i+=1){var value=String(values[i]||'').trim();if(parseTimeToMinutes(value)!==null)return value}
+return''}
+function getDirectWaqtTime(scope){return getFirstTimeValue([scope&&scope.getAttribute('data-at-waqt-time'),scope&&scope.getAttribute('data-actual-waqt-time'),scope&&scope.getAttribute('data-prayer-time'),scope&&scope.getAttribute('data-waqt-time'),scope&&scope.getAttribute('data-calculated-waqt-time')])}
+function getOffsetWaqtTime(scope,el){var groupKey=getPrayerGroupKey(scope);var groupWaqtTime=groupKey==='jumuah'?inferredWaqtTimesByGroup[groupKey]:'';return getFirstTimeValue([groupWaqtTime,scope&&scope.getAttribute('data-at-waqt-time'),scope&&scope.getAttribute('data-actual-waqt-time'),scope&&scope.getAttribute('data-prayer-time'),scope&&scope.getAttribute('data-calculated-waqt-time'),el&&el.getAttribute('data-waqt-time'),scope&&scope.getAttribute('data-waqt-time')])}
+function getPrayerGroupKey(scope){var prayerName=String((scope&&scope.getAttribute('data-prayer'))||'').toLowerCase();var normalized=prayerName.replace(/[^a-z0-9]+/g,'');if(/jumah|jumuah|jummah/.test(normalized))return'jumuah';return normalized}
+function getFixedTimeForKind(scope,kind){if(!scope||!kind)return'';if(kind==='adhan'){return getFirstTimeValue([scope.getAttribute('data-adhan-fixed-time'),scope.getAttribute('data-adhan-time')])}
+if(kind==='iqamah'){return getFirstTimeValue([scope.getAttribute('data-iqamah-fixed-time'),scope.getAttribute('data-iqamah-time')])}
+if(kind==='khutbah'){return getFirstTimeValue([scope.getAttribute('data-khutbah-fixed-time'),scope.getAttribute('data-khutbah-time')])}
+return''}
+function getElementKind(el){if(!el)return'';var kind=el.getAttribute('data-offset-kind')||'';if(kind)return kind;var column=el.closest&&el.closest('[data-column-type]');return column?column.getAttribute('data-column-type')||'':''}
+function isOffsetSetting(value){return/^offset$/i.test(String(value||'').trim())}
+function isFixedTimeElement(el){var setting=String((el&&el.getAttribute('data-time-setting'))||'').trim();return!isAtWaqtMarker(setting)&&!isOffsetSetting(setting)}
+function getTimeElementValue(el){if(!el)return'';return getFirstTimeValue([el.getAttribute('data-time'),el.getAttribute('data-final-time'),el.textContent])}
+function getOffsetMinutes(el){var offset=parseInt(el&&el.getAttribute('data-offset-minutes'),10);return isNaN(offset)?null:offset}
+function isAfterWaqtOffset(el){return/\bafter\s*waqt\b/i.test(getOffsetRelation(el))}
+function collectScopesByGroup(scopeSelector){var scopesByGroup={};document.querySelectorAll(scopeSelector).forEach(function(scope){var groupKey=getPrayerGroupKey(scope);if(!groupKey)return;if(!scopesByGroup[groupKey]){scopesByGroup[groupKey]=[]}
+scopesByGroup[groupKey].push(scope)});return scopesByGroup}
+function collectAtWaqtFixedCandidate(scope){var fixedCandidate='';scope.querySelectorAll('[data-time-setting]').forEach(function(el){if(fixedCandidate)return;if(!isAtWaqtMarker(el.getAttribute('data-time-setting')))return;fixedCandidate=getFixedTimeForKind(scope,getElementKind(el))});return fixedCandidate}
+function collectScopeFixedTimes(scope,fixedTimes){['adhan','iqamah','khutbah'].forEach(function(kind){var settingName=kind==='iqamah'?'iqamah':kind;var setting=scope.getAttribute('data-'+settingName+'-settings')||'';if(isAtWaqtMarker(setting)||isOffsetSetting(setting))return;var fixedTime=getFixedTimeForKind(scope,kind);if(fixedTime)fixedTimes.push(fixedTime);})}
+function collectScopeAfterWaqtOffsets(scope,afterWaqtOffsets){[{kind:'adhan',offsetAttr:'data-adhan-offset',textAttr:'data-adhan-offset-text'},{kind:'iqamah',offsetAttr:'data-iqamah-offset',textAttr:'data-iqamah-offset-text'},{kind:'khutbah',offsetAttr:'data-khutbah-offset',textAttr:'data-khutbah-offset-text'}].forEach(function(item){var settingName=item.kind==='iqamah'?'iqamah':item.kind;var setting=scope.getAttribute('data-'+settingName+'-settings')||'';var offset=parseInt(scope.getAttribute(item.offsetAttr),10);var offsetText=String(scope.getAttribute(item.textAttr)||'').replace(/([a-z])([A-Z])/g,'$1 $2');if(!isOffsetSetting(setting)||isNaN(offset)||!/\bafter\s*waqt\b/i.test(offsetText))return;afterWaqtOffsets.push(offset)})}
+function inferJumuahWaqtTime(scopes){var fixedTimes=[];var afterWaqtOffsets=[];scopes.forEach(function(scope){collectScopeFixedTimes(scope,fixedTimes);collectScopeAfterWaqtOffsets(scope,afterWaqtOffsets);scope.querySelectorAll('.time-value[data-time]').forEach(function(el){var value=getTimeElementValue(el);if(!value||!isFixedTimeElement(el))return;fixedTimes.push(value)});scope.querySelectorAll('[data-offset-kind]').forEach(function(el){var offset=getOffsetMinutes(el);if(offset===null||!isAfterWaqtOffset(el))return;afterWaqtOffsets.push(offset)})});if(!fixedTimes.length||!afterWaqtOffsets.length)return'';var earliestFixedTime=fixedTimes.reduce(function(earliest,time){if(!earliest)return time;var earliestMinutes=parseTimeToMinutes(earliest);var timeMinutes=parseTimeToMinutes(time);if(timeMinutes===null)return earliest;if(earliestMinutes===null||timeMinutes<earliestMinutes)return time;return earliest},'');var smallestAfterWaqtOffset=afterWaqtOffsets.reduce(function(smallest,offset){return Math.abs(offset)<Math.abs(smallest)?offset:smallest},afterWaqtOffsets[0]);return addMinutesToTime(earliestFixedTime,smallestAfterWaqtOffset)}
+function collectInferredWaqtTimes(scopeSelector){inferredWaqtTimesByGroup={};var scopesByGroup=collectScopesByGroup(scopeSelector);document.querySelectorAll(scopeSelector).forEach(function(scope){try{var groupKey=getPrayerGroupKey(scope);if(!groupKey||inferredWaqtTimesByGroup[groupKey])return;var directCandidate=getDirectWaqtTime(scope);if(directCandidate){inferredWaqtTimesByGroup[groupKey]=directCandidate;return}
+var fixedCandidate=collectAtWaqtFixedCandidate(scope);if(fixedCandidate){inferredWaqtTimesByGroup[groupKey]=fixedCandidate}}catch(e){}});Object.keys(scopesByGroup).forEach(function(groupKey){try{if(inferredWaqtTimesByGroup[groupKey])return;if(groupKey==='jumuah'){var inferredJumuahWaqt=inferJumuahWaqtTime(scopesByGroup[groupKey]);if(inferredJumuahWaqt){inferredWaqtTimesByGroup[groupKey]=inferredJumuahWaqt}}}catch(e){}})}
+function getScopeWaqtTime(scope,el){var groupKey=getPrayerGroupKey(scope);var groupWaqtTime=groupKey?inferredWaqtTimesByGroup[groupKey]:'';var kind=getElementKind(el);var fixedTimeForKind=isAtWaqtMarker(el&&el.getAttribute('data-time-setting'))?getFixedTimeForKind(scope,kind):'';return getFirstTimeValue([el&&el.getAttribute('data-waqt-time'),scope&&scope.getAttribute('data-at-waqt-time'),scope&&scope.getAttribute('data-actual-waqt-time'),scope&&scope.getAttribute('data-prayer-time'),scope&&scope.getAttribute('data-calculated-waqt-time'),scope&&scope.getAttribute('data-waqt-time'),fixedTimeForKind,groupWaqtTime])}
+function getAtWaqtValue(row,el){var legacyAtWaqt=getFirstTimeValue([el&&el.getAttribute('data-at-waqt'),row&&row.getAttribute('data-at-waqt')]);if(legacyAtWaqt)return legacyAtWaqt;return getScopeWaqtTime(row,el)}
+function shouldUseAtWaqt(el){return(isAtWaqtMarker(el.getAttribute('data-time'))||isAtWaqtMarker(el.getAttribute('data-final-time'))||isAtWaqtMarker(el.getAttribute('data-time-setting')))}
+function applyAtWaqtTimes(){document.querySelectorAll('.row').forEach(function(row){row.querySelectorAll('[data-at-waqt]').forEach(function(el){try{var atWaqt=getAtWaqtValue(row,el);if(!atWaqt||!shouldUseAtWaqt(el))return;el.classList.remove('offset-value');el.classList.remove('offset-time-value');el.classList.add('time-value');el.setAttribute('data-at-waqt-applied','true');renderTimeValue(el,atWaqt);var offsetLabel=el.parentNode&&el.parentNode.querySelector('.offset-time-label');if(offsetLabel){offsetLabel.style.display='none'}}catch(e){}})})}
+function getOffsetRelation(el){var label=el.parentNode&&el.parentNode.querySelector('.offset-time-label[data-offset-text]');return el.getAttribute('data-offset-text')||(label&&label.getAttribute('data-offset-text'))||''}
+function getColumnTime(row,columnType){var column=row.querySelector('[data-column-type="'+columnType+'"]');if(!column)return'';var calculatedEl=column.querySelector('[data-offset-calculated-time]');if(calculatedEl){return calculatedEl.getAttribute('data-offset-calculated-time')||''}
+var timeEl=column.querySelector('.time-value[data-time]');return timeEl?timeEl.getAttribute('data-time'):''}
+function getOffsetBaseTime(row,el){var kind=el.getAttribute('data-offset-kind');var relation=getOffsetRelation(el);var atWaqt=getOffsetWaqtTime(row,el);if(kind==='iqamah'&&/\bafter\s*adhan\b/i.test(relation)){return getColumnTime(row,'adhan')||el.getAttribute('data-adhan-time')||atWaqt}
+return atWaqt}
+function applyOffsetCalculatedTimes(){var card=document.querySelector('.schedule-card');var adhanEnabled=card&&card.getAttribute('data-adhan-enabled')==='true';document.querySelectorAll('.row').forEach(function(row){try{if(!isTruthyFlag(row.getAttribute('data-display-offset-calculated-time')))return;['adhan','iqamah','khutbah'].forEach(function(kind){if(kind==='iqamah'&&!adhanEnabled)return;row.querySelectorAll('[data-offset-kind="'+kind+'"]').forEach(function(el){if(el.getAttribute('data-at-waqt-applied')==='true')return;var baseTime=getOffsetBaseTime(row,el);var calculatedTime=addMinutesToTime(baseTime,el.getAttribute('data-offset-minutes'));var finalTime=el.getAttribute('data-final-time')||'';if(!calculatedTime&&parseTimeToMinutes(finalTime)!==null){calculatedTime=finalTime}
+if(!calculatedTime)return;el.classList.remove('offset-value');el.classList.remove('offset-time-value');el.classList.add('time-value');el.setAttribute('data-offset-calculated-time',calculatedTime);renderTimeValue(el,calculatedTime);var offsetLabel=el.parentNode&&el.parentNode.querySelector('.offset-time-label');if(offsetLabel){offsetLabel.style.display='none'}})})}catch(e){}})}
+function parseSortedList(rawValue){return String(rawValue||'').split(',').map(function(item){return item.trim()}).filter(Boolean)}
+function logEmbedDebug(){var card=document.querySelector('.schedule-card');var adhanEnabled=card&&card.getAttribute('data-adhan-enabled')==='true';var iqamahEnabled=card&&card.getAttribute('data-iqamah-enabled')==='true';var displayOffsetCalculatedTimes=[];var sortedLists=[];document.querySelectorAll('.row').forEach(function(row){var prayerName=row.getAttribute('data-prayer')||'';var displayOffsetCalculatedTime=row.getAttribute('data-display-offset-calculated-time')||'';var atWaqt=row.getAttribute('data-at-waqt')||'';var waqtTime=row.getAttribute('data-waqt-time')||'';var calculatedWaqtTime=row.getAttribute('data-calculated-waqt-time')||'';var inferredWaqtTime=inferredWaqtTimesByGroup[getPrayerGroupKey(row)]||'';displayOffsetCalculatedTimes.push({prayerName:prayerName,displayOffsetCalculatedTime:displayOffsetCalculatedTime,atWaqt:atWaqt,waqtTime:waqtTime,calculatedWaqtTime:calculatedWaqtTime,inferredWaqtTime:inferredWaqtTime,});sortedLists.push({prayerName:prayerName,sortedList:parseSortedList(row.getAttribute('data-sorted-list')),displayOffsetCalculatedTime:displayOffsetCalculatedTime,atWaqt:atWaqt,waqtTime:waqtTime,calculatedWaqtTime:calculatedWaqtTime,inferredWaqtTime:inferredWaqtTime,});console.log('displayOffsetCalculatedTime',prayerName,displayOffsetCalculatedTime);console.log('atWaqt',prayerName,atWaqt);console.log('waqtTime',prayerName,waqtTime);console.log('calculatedWaqtTime',prayerName,calculatedWaqtTime);console.log('inferredWaqtTime',prayerName,inferredWaqtTime)});window.sortedList=sortedLists;window.adhanEnabled=adhanEnabled;window.iqamahEnabled=iqamahEnabled;window.displayOffsetCalculatedTimes=displayOffsetCalculatedTimes;window.__ABABIL_SALAH_EMBED_DEBUG__={sortedList:sortedLists,adhanEnabled:adhanEnabled,iqamahEnabled:iqamahEnabled,displayOffsetCalculatedTimes:displayOffsetCalculatedTimes,};console.log('sortedList',window.sortedList);console.log('adhanEnabled',window.adhanEnabled);console.log('iqamahEnabled',window.iqamahEnabled)}
+function applySecondaryColumnEmphasis(){var rows=document.querySelectorAll('.row');rows.forEach(function(row){try{var visibleColumns=[];var columns=row.querySelectorAll('[data-column-type]');columns.forEach(function(column){column.setAttribute('data-column-emphasis','primary');if(column.getClientRects().length>0){visibleColumns.push(column)}});if(visibleColumns.length===1){visibleColumns[0].setAttribute('data-column-emphasis','secondary')}else if(visibleColumns[1]){visibleColumns[1].setAttribute('data-column-emphasis','secondary')}}catch(e){}})}
+function insertDividersBetweenColumns(){var rows=document.querySelectorAll('.row');rows.forEach(function(row){try{var rightContainer=row.querySelector('.right');if(!rightContainer)return;var columns=[];rightContainer.querySelectorAll('[data-column-type]').forEach(function(column){if(column.getClientRects().length>0){columns.push(column)}});var existingDividers=rightContainer.querySelectorAll('.divider');existingDividers.forEach(function(div){div.remove()});for(var i=1;i<columns.length;i++){var divider=document.createElement('div');divider.className='divider';columns[i].parentNode.insertBefore(divider,columns[i])}}catch(e){}})}
+if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',function(){formatTimes();formatOffsetTexts();collectInferredWaqtTimes('.row');applyAtWaqtTimes();applyOffsetCalculatedTimes();logEmbedDebug();insertDividersBetweenColumns();applySecondaryColumnEmphasis()})}else{formatTimes();formatOffsetTexts();collectInferredWaqtTimes('.row');applyAtWaqtTimes();applyOffsetCalculatedTimes();logEmbedDebug();insertDividersBetweenColumns();applySecondaryColumnEmphasis()}})()
+  </script>
+    <script src="https://bmc-masjid.github.io/PrayTime.js"></script>
+    
+<script>
+(function(){'use strict';var LAT=40.638421;var LNG=-73.978643;var IQAMAH={Fajr:"04:30 AM",Zuhr:"01:30 PM",Asr:"05:30 PM",Isha:"10:10 PM",Jummah:"01:15 PM"}; // the left controls the iqamah 
+function getFirstElementByClass(className,parent){if(document.querySelector){return(parent||document).querySelector('.'+className)}
+var elems=getAllElementsByClass(className,parent);return elems.length>0?elems[0]:null}
+function getAllElementsByClass(className,parent){if(document.querySelectorAll){return(parent||document).querySelectorAll('.'+className)}
+var results=[];var root=parent||document;var all=root.getElementsByTagName("*");for(var i=0;i<all.length;i++){if(all[i].className&&(" "+all[i].className+" ").indexOf(" "+className+" ")>-1){results.push(all[i])}}
+return results}
+function strPadLeft(string,padLength,padString){var str=String(string);while(str.length<padLength){str=padString+str}
+return str}
+function formatPadTime(timeStr){var m=timeStr.match(/(\d+):(\d+)\s*(AM|PM)/i);if(!m)return timeStr;var h=parseInt(m[1],10);var mm=m[2];var ap=m[3].toUpperCase();var hhPadded=strPadLeft(h,2,'0');return hhPadded+":"+mm+" "+ap}
+function convert24To12(str){var p=str.split(":");var h=parseInt(p[0],10);var m=p[1];var ap=h>=12?"PM":"AM";h%=12;if(h===0)h=12;return formatPadTime(h+":"+m+" "+ap)}
+function addMinutes(timeStr,min){var m=timeStr.match(/(\d+):(\d+)\s*(AM|PM)/i);if(!m)return timeStr;var h=parseInt(m[1],10);var mm=parseInt(m[2],10);var ap=m[3].toUpperCase();if(ap==="PM"&&h!==12)h+=12;if(ap==="AM"&&h===12)h=0;var total=h*60+mm+min;total%=1440;h=Math.floor(total/60);mm=total%60;ap=h>=12?"PM":"AM";h=h%12;if(h===0)h=12;return formatPadTime(h+":"+(mm<10?"0":"")+mm+" "+ap)}
+function setTime(row,type,time){var col=getFirstElementByClass(type+"-column",row);if(!col)return;var valSpan=getFirstElementByClass("time-value",col)||col;valSpan.setAttribute("data-time",time);var m=time.match(/(\d+:\d+)\s*(AM|PM)/i);if(m){valSpan.innerHTML=m[1]+'<span class="ampm">'+m[2].toUpperCase()+'</span>'}
+row.setAttribute("data-"+type+"-time",time)}
+function updateRows(times){var rows=getAllElementsByClass("row");for(var i=0;i<rows.length;i++){var row=rows[i];var prayer=row.getAttribute("data-prayer");if(prayer==="Maghrb")prayer="Maghrib";if(prayer==="Jummah"){setTime(row,"iqamah",IQAMAH.Jummah);continue}
+setTime(row,"adhan",times[prayer]);if(prayer==="Maghrib"){setTime(row,"iqamah",addMinutes(times.Maghrib,7))}else{setTime(row,"iqamah",IQAMAH[prayer])}}}
+function ajaxGet(url,successCallback){var xhr;if(typeof XMLHttpRequest!=='undefined'){xhr=new XMLHttpRequest()}else{var versions=["MSXML2.XmlHttp.6.0","MSXML2.XmlHttp.3.0","Microsoft.XMLHTTP"];for(var i=0;i<versions.length;i++){try{xhr=new ActiveXObject(versions[i]);break}catch(e){}}}
+if(!xhr)return;xhr.onreadystatechange=function(){if(xhr.readyState===4){if(xhr.status===200){var data;try{if(typeof JSON!=='undefined'&&JSON.parse){data=JSON.parse(xhr.responseText)}else{data=eval("("+xhr.responseText+")")}}catch(e){return}
+successCallback(data)}}};try{xhr.open("GET",url,!0);xhr.send()}catch(err){}}
+function fetchTimes(){var d=new Date();var url="https://api.aladhan.com/v1/timings/"+d.getDate()+"-"+(d.getMonth()+1)+"-"+d.getFullYear()+"?latitude="+LAT+"&longitude="+LNG+"&method=2";ajaxGet(url,function(j){if(j&&j.data&&j.data.timings){var t=j.data.timings;updateRows({Fajr:convert24To12(t.Fajr),Zuhr:convert24To12(t.Dhuhr),Asr:convert24To12(t.Asr),Maghrib:convert24To12(t.Maghrib),Isha:convert24To12(t.Isha)})}})}
+function updateMasjidTitle(newTitle){var header=getFirstElementByClass("header");if(header){var h2=header.getElementsByTagName("h2")[0];if(h2)h2.innerHTML=newTitle}}
+function autoUpdateDates(){var header=getFirstElementByClass("header");if(!header)return;var dateElement=header.getElementsByTagName("p")[0];if(!dateElement)return;var today=new Date();var days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];var months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];var gregorianStr=days[today.getDay()]+", "+months[today.getMonth()]+" "+today.getDate()+", "+today.getFullYear();var hijriStr="";if(typeof Intl!=='undefined'&&Intl.DateTimeFormat){try{var hijriFormatter=new Intl.DateTimeFormat('en-US-u-ca-islamic-umalqura',{day:'numeric',month:'long',year:'numeric'});var parts=hijriFormatter.formatToParts(today);var hDay='',hMonth='',hYear='';for(var i=0;i<parts.length;i++){if(parts[i].type==='day')hDay=parts[i].value;if(parts[i].type==='month')hMonth=parts[i].value;if(parts[i].type==='year')hYear=parts[i].value}
+hijriStr=" | "+hDay+" "+hMonth+", "+hYear}catch(e){hijriStr=""}}
+dateElement.innerHTML=gregorianStr+hijriStr}
+function addSalahTimesHeading(){var headerContainer=getFirstElementByClass("header");if(!headerContainer)return;var dateElement=headerContainer.getElementsByTagName("p")[0];if(!dateElement)return;var salahHeading=document.createElement('h4');salahHeading.innerHTML="SALAH TIMES";salahHeading.style.textAlign="center";salahHeading.style.marginTop="10px";salahHeading.style.marginBottom="5px";salahHeading.style.fontSize="14px";salahHeading.style.fontWeight="bold";salahHeading.style.color="#ffffff";salahHeading.style.letterSpacing="1px";headerContainer.insertBefore(salahHeading,dateElement)}
+autoUpdateDates();updateMasjidTitle("Darul Jannah Masjid & Islamic Center");addSalahTimesHeading();var footer=getFirstElementByClass("footer");if(footer){var footertext=footer.getElementsByTagName("p")[0];if(footertext){footertext.innerHTML='Darul Jannah Masjid & Islamic Center'}
+var footerphoto=footer.getElementsByTagName("a")[0];if(footerphoto){footerphoto.style.display='none'}}
+fetchTimes();setInterval(fetchTimes,60*60*1000);function midnightRefresh(){var now=new Date();var tomorrow=new Date(now.getFullYear(),now.getMonth(),now.getDate()+1,0,1,0);setTimeout(function(){fetchTimes();midnightRefresh()},tomorrow.getTime()-now.getTime())}
+midnightRefresh()})()
+  </script>
+ 
+
+</body></html>
